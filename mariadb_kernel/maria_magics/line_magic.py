@@ -112,13 +112,11 @@ class LineMagic(MariaMagic):
 
     def simple_chat(self, kernel, data):
 
-        client = OpenAI(
-            api_key="INSERT_API_KEY_HERE"
-        )
-
         try:
             d = self.parse_args(self.args)
             request = d["input"]
+            key = d["key"]
+            model = d["model"]
         except ValueError:
             kernel._send_message(
                 "stderr",
@@ -126,8 +124,12 @@ class LineMagic(MariaMagic):
             )
             return
         
+        client = OpenAI(
+            api_key=key
+        )
+        
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=model,
             messages=[
                 {"role": "developer", "content": "You are a helpful assistant."},
                 {
