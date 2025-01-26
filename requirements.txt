@@ -7,3 +7,4 @@ setuptools-scm
 ipykernel
 beautifulsoup4
 mycli
+openai

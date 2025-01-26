@@ -16,6 +16,8 @@ from distutils import util
 from matplotlib import pyplot
 import os
 import shlex
+from openai import OpenAI
+
 
 
 class LineMagic(MariaMagic):
@@ -107,3 +109,33 @@ class LineMagic(MariaMagic):
             kernel.send_response(kernel.iopub_socket, "display_data", display_content)
 
         os.unlink(image_name)
+
+    def simple_chat(self, kernel, data):
+
+        client = OpenAI(
+            api_key="INSERT_API_KEY_HERE"
+        )
+
+        try:
+            d = self.parse_args(self.args)
+            request = d["input"]
+        except ValueError:
+            kernel._send_message(
+                "stderr",
+                "There was an error while parsing the arguments. "
+            )
+            return
+        
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "developer", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"Generate me a {request}"
+                }
+            ]
+        )
+
+        message = { 'name': 'stdout', 'text': completion.choices[0].message.content }
+        kernel.send_response(kernel.iopub_socket, 'stream', message)
