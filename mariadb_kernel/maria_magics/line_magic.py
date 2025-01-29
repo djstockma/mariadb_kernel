@@ -110,11 +110,37 @@ class LineMagic(MariaMagic):
 
         os.unlink(image_name)
 
-    def simple_chat(self, kernel, data):
 
+    def prompt(self, kernel, data):
+
+        prompt = self.args
+        
+        client = kernel.client
+        if client is None:
+            kernel._send_message(
+                "stderr",
+                "There is no OpenAI client set. Please set it using %set_llm"
+            )
+
+        completion = client.chat.completions.create(
+            model=kernel.model,
+            messages=[
+                {"role": "developer", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        message = { 'name': 'stdout', 'text': completion.choices[0].message.content }
+        kernel.send_response(kernel.iopub_socket, 'stream', message)
+
+
+    def set_llm(self, kernel, data):
+        
         try:
             d = self.parse_args(self.args)
-            request = d["input"]
             key = d["key"]
             model = d["model"]
         except ValueError:
@@ -123,21 +149,19 @@ class LineMagic(MariaMagic):
                 "There was an error while parsing the arguments. "
             )
             return
+        except KeyError:
+            kernel._send_message(
+                "stderr",
+                "Please provide both a key and a model"
+            )
+            return
+        
         
         client = OpenAI(
             api_key=key
         )
-        
-        completion = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "developer", "content": "You are a helpful assistant."},
-                {
-                    "role": "user",
-                    "content": f"Generate me a {request}"
-                }
-            ]
-        )
 
-        message = { 'name': 'stdout', 'text': completion.choices[0].message.content }
+        kernel.client = client
+        kernel.model = model
+        message = { 'name': 'stdout', 'text': "LLM model set!" }
         kernel.send_response(kernel.iopub_socket, 'stream', message)

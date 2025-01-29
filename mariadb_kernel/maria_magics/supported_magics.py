@@ -11,7 +11,8 @@ from mariadb_kernel.maria_magics.bar import Bar
 from mariadb_kernel.maria_magics.pie import Pie
 from mariadb_kernel.maria_magics.delimiter import Delimiter
 from mariadb_kernel.maria_magics.load import Load
-from mariadb_kernel.maria_magics.chatgpt_simple import Chatgpt_simple
+from mariadb_kernel.maria_magics.set_llm import Set_llm
+from mariadb_kernel.maria_magics.prompt import Prompt
 
 
 def get():
@@ -23,5 +24,6 @@ def get():
         "lsmagic": LSMagic,
         "delimiter": Delimiter,
         "load": Load,
-        "chatgpt": Chatgpt_simple
+        "set_llm": Set_llm,
+        "prompt": Prompt,
     }
